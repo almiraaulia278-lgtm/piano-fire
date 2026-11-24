@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game - Piano Fire</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.game-wrap{max-width:480px;margin:20px auto;text-align:center;color:white}
+.hud{display:flex;justify-content:space-between;background:#1e2a5a;padding:12px 16px;border-radius:12px;font-weight:800}
+#board{position:relative;width:100%;height:420px;background:#0f1426;border:2px solid #333;border-radius:14px;overflow:hidden;margin-top:14px}
+.col{position:absolute;top:0;bottom:0;width:25%;border-right:1px solid #222}
+.col:nth-child(1){left:0}.col:nth-child(2){left:25%}.col:nth-child(3){left:50%}.col:nth-child(4){left:75%;border:none}
+.tile{position:absolute;width:25%;height:90px;background:#ff6b00;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;box-shadow:0 4px 0 #a33d00}
+.tile.hit{background:#51ff8a}
+#overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10}
+#overlay h3{font-size:22px}
+.key-row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.key-btn{flex:1;background:#222;color:white;padding:14px 0;border-radius:10px;font-weight:900;border:1px solid #444;cursor:pointer}
+.key-btn.active{background:#ff6b00}
+</style>
+</head>
+<body>
+<div class="game-wrap">
+  <h2>🎹 Piano Fire - Game</h2>
+  <p>Tekan tombol A S D F atau klik ubin oranye yang jatuh!</p>
+  <div class="hud"><span id="score">Skor: 0</span><span id="lives">Nyawa: ❤️❤️❤️</span></div>
+  <div id="board">
+    <div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+    <div id="overlay"><h3>Siap Membakar Panggung?</h3><button id="btn-start" style="background:#ff6b00;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:900;cursor:pointer;font-size:16px">Mulai</button></div>
+  </div>
+  <div class="key-row">
+    <button class="key-btn" data-key="a">A</button>
+    <button class="key-btn" data-key="s">S</button>
+    <button class="key-btn" data-key="d">D</button>
+    <button class="key-btn" data-key="f">F</button>
+  </div>
+  <p style="margin-top:14px"><a href="dashboard.html" style="color:#aaa">← Kembali ke Dashboard</a></p>
+</div>
+
+<script>
+var score=0, lives=3, playing=false, timer=null, spawnTimer=null;
+var board=document.getElementById("board");
+var scoreEl=document.getElementById("score");
+var livesEl=document.getElementById("lives");
+var overlay=document.getElementById("overlay");
+var keys=["a","s","d","f"];
+
+function updateHUD(){
+  scoreEl.textContent="Skor: "+score;
+  livesEl.textContent="Nyawa: "+"❤️".repeat(lives);
+}
+function gameOver(){
+  playing=false; clearInterval(timer); clearInterval(spawnTimer);
+  document.querySelectorAll(".tile").forEach(function(t){t.remove()});
+  var user=localStorage.getItem("pf_current");
+  if(user){
+    var users=JSON.parse(localStorage.getItem("pf_users")||"{}");
+    if(users[user]){
+      users[user].total=(users[user].total||0)+1;
+      if(score>(users[user].high||0)) users[user].high=score;
+      users[user].last=new Date().toLocaleDateString("id-ID");
+      localStorage.setItem("pf_users", JSON.stringify(users));
+    }
+  }
+  overlay.innerHTML='<h3>Game Over!</h3><p>Skor kamu: '+score+'</p><button id="btn-restart" style="background:#ff6b00;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:900;cursor:pointer">Main Lagi</button><a href="dashboard.html" style="color:white">Ke Dashboard</a>';
+  overlay.style.display="flex";
+  document.getElementById("btn-restart").addEventListener("click", startGame);
+}
+function spawnTile(){
+  if(!playing) return;
+  var col=Math.floor(Math.random()*4);
+  var tile=document.createElement("div");
+  tile.className="tile";
+  tile.style.left=(col*25)+"%";
+  tile.style.top="-90px";
+  tile.dataset.col=col;
+  tile.textContent=keys[col].toUpperCase();
+  tile.addEventListener("click", function(){ hitTile(tile); });
+  board.appendChild(tile);
+}
+function hitTile(tile){
+  if(!playing) return;
+  score+=10; updateHUD();
+  tile.classList.add("hit");
+  setTimeout(function(){ tile.remove(); }, 100);
+}
+function pressKey(k){
+  if(!playing) return;
+  var idx=keys.indexOf(k); if(idx===-1) return;
+  var btn=document.querySelector('[data-key="'+k+'"]');
+  if(btn){ btn.classList.add("active"); setTimeout(function(){btn.classList.remove("active")},150); }
+  var tiles=document.querySelectorAll(".tile");
+  for(var i=0;i<tiles.length;i++){
+    var t=tiles[i];
+    if(parseInt(t.dataset.col)===idx){
+      var top=parseInt(t.style.top);
+      if(top>250 && top<420){ hitTile(t); return; }
+    }
+  }
+}
+function startGame(){
+  score=0; lives=3; playing=true; updateHUD();
+  overlay.style.display="none";
+  document.querySelectorAll(".tile").forEach(function(t){t.remove()});
+  clearInterval(timer); clearInterval(spawnTimer);
+  spawnTimer=setInterval(spawnTile, 700);
+  timer=setInterval(function(){
+    var tiles=document.querySelectorAll(".tile");
+    tiles.forEach(function(t){
+      var top=parseInt(t.style.top)||-90;
+      top+=8; t.style.top=top+"px";
+      if(top>420){
+        t.remove();
+        if(playing){ lives--; updateHUD(); if(lives<=0) gameOver(); }
+      }
+    });
+  }, 30);
+}
+document.getElementById("btn-start").addEventListener("click", startGame);
+document.addEventListener("keydown", function(e){ pressKey(e.key.toLowerCase()); });
+document.querySelectorAll(".key-btn").forEach(function(b){
+  b.addEventListener("click", function(){ pressKey(b.dataset.key); });
+});
+</script>
+</body>
+</html>

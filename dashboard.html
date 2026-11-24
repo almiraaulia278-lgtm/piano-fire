@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Piano Fire</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.dash{max-width:600px;margin:30px auto;color:white;text-align:center}
+.card{background:#1e2a5a;padding:20px;border-radius:14px;margin-top:16px}
+.stat{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.stat div{background:#0f1426;padding:14px;flex:1;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="dash">
+  <h2 id="hello">Halo!</h2>
+  <p>Selamat datang di Piano Fire</p>
+  <div class="card">
+    <h3>Ringkasan Permainan</h3>
+    <div class="stat">
+      <div><b id="high">0</b><br>Skor Tertinggi</div>
+      <div><b id="total">0</b><br>Total Main</div>
+      <div><b id="last">-</b><br>Terakhir Main</div>
+    </div>
+  </div>
+  <br>
+  <a href="game.html" class="primary-btn" style="display:block;padding:14px">🎮 Mulai Game</a>
+  <br>
+  <button id="btn-logout" style="background:#ff3b3b;color:white;border:none;padding:12px 20px;border-radius:10px;font-weight:900;cursor:pointer;width:100%">Logout</button>
+</div>
+<script>
+var user = localStorage.getItem("pf_current");
+if(!user){ window.location.href = "login.html"; }
+else {
+  var users = JSON.parse(localStorage.getItem("pf_users") || "{}");
+  var data = users[user] || {high:0, total:0, last:"-"};
+  document.getElementById("hello").textContent = "Halo, " + user + "!";
+  document.getElementById("high").textContent = data.high || 0;
+  document.getElementById("total").textContent = data.total || 0;
+  document.getElementById("last").textContent = data.last || "-";
+}
+document.getElementById("btn-logout").addEventListener("click", function(){
+  localStorage.removeItem("pf_current");
+  window.location.href = "index.html";
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk - Piano Fire</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html">🔥 PIANO<span>FIRE</span></a>
+  <nav>
+    <a href="index.html">Beranda</a>
+    <a href="register.html">Buat Akun</a>
+  </nav>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h2>Selamat Datang Kembali</h2>
+    <p>Masuk untuk melanjutkan permainanmu.</p>
+    <input type="text" id="login-user" placeholder="Username">
+    <input type="password" id="login-pass" placeholder="Password">
+    <p id="login-msg" class="msg"></p>
+    <button id="btn-login" class="primary-btn full">Masuk</button>
+    <p class="switch">Belum punya akun? <a href="register.html">Daftar di sini</a></p>
+  </div>
+</main>
+
+<script>
+document.getElementById("btn-login").addEventListener("click", function() {
+  var user = document.getElementById("login-user").value.trim();
+  var pass = document.getElementById("login-pass").value;
+  var msg = document.getElementById("login-msg");
+  var users = JSON.parse(localStorage.getItem("pf_users") || "{}");
+  if (!users[user] || users[user].password !== pass) {
+    msg.textContent = "Username / password salah!";
+    msg.style.color = "#ff6b6b";
+    return;
+  }
+  localStorage.setItem("pf_current", user);
+  msg.textContent = "Login berhasil! Masuk ke dashboard...";
+  msg.style.color = "#51ff8a";
+  setTimeout(function(){ window.location.href = "dashboard.html"; }, 800);
+});
+</script>
+</body>
+</html>

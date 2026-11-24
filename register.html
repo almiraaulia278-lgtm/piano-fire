@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar - Piano Fire</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html">🔥 PIANO<span>FIRE</span></a>
+  <nav>
+    <a href="index.html">Beranda</a>
+    <a href="login.html" class="btn-small">Masuk</a>
+  </nav>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h2>Buat Akun Piano Fire</h2>
+    <p>Bergabunglah dan mulai perjalanan musikmu.</p>
+    <input type="text" id="reg-user" placeholder="Username">
+    <input type="password" id="reg-pass" placeholder="Password">
+    <input type="password" id="reg-confirm" placeholder="Konfirmasi Password">
+    <p id="reg-msg" class="msg"></p>
+    <button id="btn-register" class="primary-btn full">Daftar</button>
+    <p class="switch">Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+  </div>
+</main>
+
+<script>
+document.getElementById("btn-register").addEventListener("click", function() {
+  var user = document.getElementById("reg-user").value.trim();
+  var pass = document.getElementById("reg-pass").value;
+  var conf = document.getElementById("reg-confirm").value;
+  var msg = document.getElementById("reg-msg");
+  if (!user || !pass) { msg.textContent = "Username dan password wajib diisi!"; msg.style.color = "#ff6b6b"; return; }
+  if (pass !== conf) { msg.textContent = "Konfirmasi password tidak sama!"; msg.style.color = "#ff6b6b"; return; }
+  var users = JSON.parse(localStorage.getItem("pf_users") || "{}");
+  if (users[user]) { msg.textContent = "Username sudah dipakai!"; msg.style.color = "#ff6b6b"; return; }
+  users[user] = { password: pass, high: 0, total: 0, last: "-" };
+  localStorage.setItem("pf_users", JSON.stringify(users));
+  msg.textContent = "Berhasil daftar! Pindah ke login...";
+  msg.style.color = "#51ff8a";
+  setTimeout(function(){ window.location.href = "login.html"; }, 1000);
+});
+</script>
+</body>
+</html>
